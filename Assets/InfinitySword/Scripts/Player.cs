@@ -1,9 +1,11 @@
 using Assets.InfinitySword.Scripts.Pattern;
 using DG.Tweening;
+using System;
 using UniRx;
 using UniRx.Triggers;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using static UnityEngine.Rendering.DebugUI;
 
 namespace Assets.InfinitySword.Scripts
 {
@@ -23,28 +25,25 @@ namespace Assets.InfinitySword.Scripts
         [SerializeField] private KeyCode _left = KeyCode.A;
         [SerializeField] private KeyCode _right = KeyCode.D;
 
+        public float maxMass = 1.5f;
         public float strength = 200;
         public float speed = 0.1f;
-        public float rotateSpeed = 1;
-        public float initialDrag = 1.0f;
-        public float drag = 0.1f;
+        public float swingSpeed = 1;
         public float initialHp;
         public ReactiveProperty<float> hp = new ReactiveProperty<float>();
 
-        private Vector3 _velocity;
-
-        [SerializeField] private GameObject _character;
-
         [SerializeField] private Dagger _dagger;
+        [SerializeField] private Transform _character;
+        [SerializeField] private Rigidbody _rigidbody;
 
-        private Vector3 _direction;
         private bool _isHeavy = false;
 
         // Start is called before the first frame update
         void Start()
         {
             hp.Value = initialHp;
-            _direction = _character.transform.forward;
+            _rigidbody = GetComponent<Rigidbody>();
+
             this.UpdateAsObservable()
                 .Where(_ => Input.GetKey(_up))
                 .Subscribe(_=>MoveUp());
@@ -78,19 +77,9 @@ namespace Assets.InfinitySword.Scripts
 
             this.UpdateAsObservable().Subscribe(_ =>
             {
-                _character.transform.DOKill();
-                _character.transform.DORotateQuaternion(Quaternion.LookRotation(_direction, _character.transform.up),
-                    _dagger.length.Value / rotateSpeed);
+                _rigidbody.mass = _rigidbody.mass < maxMass ?MathF.Log(_dagger.length.Value)/10 : maxMass;
+                _character.rotation = Quaternion.LookRotation(_dagger.transform.up, Vector3.up);
             });
-
-            this.UpdateAsObservable()
-                .Subscribe(_ =>
-                {
-                    Vector3 result = _velocity * (1 / Mathf.Pow(_dagger.length.Value,1.2f));
-                    drag = initialDrag * (1 / _dagger.length.Value);
-                    transform.DOMove(result, 0.1f).SetRelative(true);
-                    _velocity -= _velocity * drag;
-                });
 
 #if UNITY_EDITOR
             this.UpdateAsObservable()
@@ -112,14 +101,24 @@ namespace Assets.InfinitySword.Scripts
         }
         private void Swing(Vector3 point)
         {
-            point.y= _character.transform.position.y;
-            _direction = Vector3.Normalize(point - _character.transform.position);
+            Vector3 swingDirection = (point - _dagger.transform.position).normalized;
+            Vector3 crossProduct = Vector3.Cross(_dagger.transform.up, swingDirection);
+
+            // Check if the cross product is pointing upwards
+            if (crossProduct.y > 0)
+            {
+                _dagger.GetComponent<ArticulationBody>().AddTorque(crossProduct * swingSpeed, ForceMode.Force);
+            }
+            else
+            {
+                _dagger.GetComponent<ArticulationBody>().AddTorque(crossProduct * swingSpeed, ForceMode.Force);
+            }
         }
 
         private void Move(Vector3 direction)
         {
             transform.DOKill();
-            _velocity += direction * speed;
+            _rigidbody.AddForce(direction * speed, ForceMode.Force);
         }
 
         void MoveUp()

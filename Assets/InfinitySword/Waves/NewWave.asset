@@ -13,11 +13,5 @@ MonoBehaviour:
   m_Name: NewWave
   m_EditorClassIdentifier: 
   enemyList:
-  - type: 0
-    time: 1
-  - type: 0
-    time: 2
-  - type: 4
-    time: 3
-  - type: 1
+  - type: 2
     time: 4

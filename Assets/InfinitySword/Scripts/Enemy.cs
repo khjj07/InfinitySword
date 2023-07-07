@@ -51,7 +51,11 @@ namespace Assets.InfinitySword.Scripts
         [SerializeField]
         private Rigidbody _rigidbody;
 
+        [SerializeField]
+        protected Animator _animator;
+
         private bool _inRange = false;
+        private bool _isAttack = false;
         private bool _isKnockBack = false;
 
         protected float knockBackDuration = 0.3f;
@@ -62,7 +66,7 @@ namespace Assets.InfinitySword.Scripts
 
         void OnDrawGizmos()
         {
-            if (Vector3.Distance(_target.position, transform.position) < _maxRange && Vector3.Distance(_target.position, transform.position) > _minRange)
+            if (_target && Vector3.Distance(_target.position, transform.position) < _maxRange && Vector3.Distance(_target.position, transform.position) > _minRange)
             {
                 Gizmos.color = UnityEngine.Color.red;
                 Gizmos.DrawWireSphere(transform.position, _maxRange);
@@ -81,12 +85,12 @@ namespace Assets.InfinitySword.Scripts
             _hp = _initialHp;
             _rigidbody = GetComponent<Rigidbody>();
 
-            this.UpdateAsObservable().Where(_ => !_inRange && !_isKnockBack)
+            this.UpdateAsObservable().Where(_ => !_isKnockBack)
                 .Select(_ => Vector3.Normalize(_target.position-transform.position))
                 .Subscribe(x => LookAt(x))
                 .AddTo(gameObject);
 
-            this.UpdateAsObservable().Where(_ => !_inRange && !_isKnockBack)
+            this.UpdateAsObservable().Where(_ =>!_isAttack&&!_inRange && !_isKnockBack)
                 .Select(_ => Vector3.Normalize(_target.position - transform.position))
                 .Subscribe(x => Move(x))
                 .AddTo(gameObject);
@@ -97,8 +101,12 @@ namespace Assets.InfinitySword.Scripts
                 .Subscribe(_ =>
                 {
                     _inRange = true;
-                    ExcuteAttackRoutine();
                 }).AddTo(gameObject);
+
+            this.UpdateAsObservable().Select(_ => _inRange)
+                .DistinctUntilChanged()
+                .Where(x => x)
+                .Subscribe(x => ExcuteAttackRoutine());
 
             this.UpdateAsObservable()
                 .Where(_ => Vector3.Distance(_target.position, transform.position) > _maxRange)
@@ -107,6 +115,16 @@ namespace Assets.InfinitySword.Scripts
                 {
                     _inRange = false;
                 }).AddTo(gameObject);
+
+            this.UpdateAsObservable().Where(_ => _velocity.magnitude > 0.1).Subscribe(_ =>
+            {
+                _animator.SetBool("Walk", true);
+            });
+
+            this.UpdateAsObservable().Where(_ => _velocity.magnitude <= 0.1).Subscribe(_ =>
+            {
+                _animator.SetBool("Walk", false);
+            });
 
             this.UpdateAsObservable()
                 .Where(_=>!_isKnockBack)
@@ -142,8 +160,8 @@ namespace Assets.InfinitySword.Scripts
         public virtual void LookAt(Vector3 direction)
         {
             Vector3 to = direction;
-            _character.DOKill();
-            _character.DORotateQuaternion(Quaternion.LookRotation(to, _character.up), 0.1f);
+            transform.DOKill();
+            transform.DORotateQuaternion(Quaternion.LookRotation(to, _character.up), 0.1f);
         }
         public virtual void Move(Vector3 direction)
         {
@@ -157,15 +175,20 @@ namespace Assets.InfinitySword.Scripts
         }
         public virtual void Attack()
         {
-            Player.instance.Hit(_damage);
+            
         }
 
         private void ExcuteAttackRoutine()
         {
-            AttackRoutine();
+            if (!_isAttack)
+            {
+                AttackRoutine();
+            }
+           
         }
         private async Task AttackRoutine()
         {
+            _isAttack = true;
             await Task.Delay((int)(_attackDelay * 1000));
             if (_inRange)
             {
@@ -175,6 +198,10 @@ namespace Assets.InfinitySword.Scripts
             else
             {
                 await Task.Delay((int)(_transitionDelay * 1000));
+                _isAttack=false;
+                _animator.SetBool("Shoot", false);
+                _animator.SetBool("Attack", false);
+                _animator.SetBool("Cast", false);
             }
         }
     }

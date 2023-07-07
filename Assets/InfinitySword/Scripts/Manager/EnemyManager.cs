@@ -87,9 +87,13 @@ namespace Assets.InfinitySword.Scripts.Manager
 
         public void CreateEnemy(Type type)
         {
+            Vector3 spawnPoint  = floor.transform.GetChild(UnityEngine.Random.Range(0, floor.transform.childCount)).position;
+            while (Vector3.Distance(spawnPoint, Player.instance.transform.position) < 5)
+            {
+                spawnPoint = floor.transform.GetChild(UnityEngine.Random.Range(0, floor.transform.childCount)).position;
+            }
             var item = Instantiate(_enemyPrefabs[(int)type]);
             item._target = Player.instance.transform;
-            Vector3 spawnPoint = floor.transform.GetChild(UnityEngine.Random.Range(0, floor.transform.childCount)).position;
             spawnPoint.y = 0.5f;
             item.transform.localPosition = spawnPoint;
             _enemies.Add(item);

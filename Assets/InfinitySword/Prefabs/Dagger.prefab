@@ -9,7 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3599464082393791415}
-  - component: {fileID: 4080892842652864786}
+  - component: {fileID: 627451545067554040}
+  - component: {fileID: 1502062966}
   m_Layer: 0
   m_Name: Dagger
   m_TagString: Untagged
@@ -33,7 +34,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4080892842652864786
+--- !u!114 &627451545067554040
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -50,8 +51,63 @@ MonoBehaviour:
   increaseInterval: 1
   lengthIncreasement: 10
   lengthDecreasement: 30
+  damge: 1
+  knockBackPower: 2
   _edge: {fileID: 7943436818249853435}
   _edgeCollider: {fileID: 5620051985217326429}
+  _articulationBody: {fileID: 1502062966}
+--- !u!171741748 &1502062966
+ArticulationBody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2827666747702964745}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Mass: 0.1
+  m_ParentAnchorPosition: {x: 0, y: 0, z: 0}
+  m_ParentAnchorRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
+  m_AnchorPosition: {x: 0, y: 0, z: 0}
+  m_AnchorRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
+  m_MatchAnchors: 1
+  m_ArticulationJointType: 0
+  m_LinearX: 2
+  m_LinearY: 2
+  m_LinearZ: 2
+  m_SwingY: 2
+  m_SwingZ: 2
+  m_Twist: 2
+  m_XDrive:
+    lowerLimit: 0
+    upperLimit: 0
+    stiffness: 0
+    damping: 0
+    forceLimit: 3.4028235e+38
+    target: 0
+    targetVelocity: 0
+  m_YDrive:
+    lowerLimit: 0
+    upperLimit: 0
+    stiffness: 0
+    damping: 0
+    forceLimit: 3.4028235e+38
+    target: 0
+    targetVelocity: 0
+  m_ZDrive:
+    lowerLimit: 0
+    upperLimit: 0
+    stiffness: 0
+    damping: 0
+    forceLimit: 3.4028235e+38
+    target: 0
+    targetVelocity: 0
+  m_LinearDamping: 1
+  m_AngularDamping: 1
+  m_JointFriction: 0.05
+  m_Immovable: 0
+  m_UseGravity: 0
+  m_CollisionDetectionMode: 0
 --- !u!1001 &161284472918660695
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -59,6 +115,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 3599464082393791415}
     m_Modifications:
+    - target: {fileID: -9090223980464643686, guid: 6e5e25083ae793040b0639c1af214b3e,
+        type: 3}
+      propertyPath: m_TagString
+      value: Dagger
+      objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 6e5e25083ae793040b0639c1af214b3e,
         type: 3}
       propertyPath: m_RootOrder
@@ -132,22 +193,6 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 161284472918660695}
   m_PrefabAsset: {fileID: 0}
---- !u!54 &9008079624508774442
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 280901220882757581}
-  serializedVersion: 2
-  m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
-  m_UseGravity: 0
-  m_IsKinematic: 1
-  m_Interpolate: 0
-  m_Constraints: 126
-  m_CollisionDetection: 0
 --- !u!64 &5620051985217326429
 MeshCollider:
   m_ObjectHideFlags: 0

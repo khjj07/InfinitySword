@@ -24,6 +24,9 @@ namespace Assets.InfinitySword.Scripts
         [SerializeField]
         private MeshCollider _edgeCollider;
 
+        [SerializeField]
+        private ArticulationBody _articulationBody;
+
         void Start()
         {
             length.Subscribe(x =>
@@ -38,11 +41,12 @@ namespace Assets.InfinitySword.Scripts
                 if (x.collider && x.collider.CompareTag("Enemy"))
                 {
                     x.collider.GetComponent<Enemy>().Hit(damge,x.contacts[0].point, -knockBackPower * x.contacts[0].normal);
+                    if (length.Value - lengthDecreasement > _minimumLength)
+                    {
+                        length.Value -= lengthDecreasement;
+                    }
                 }
-                if (length.Value - lengthDecreasement > _minimumLength)
-                {
-                    length.Value -= lengthDecreasement;
-                }
+                
             });
 
             _minimumLength = _edge.localScale.y;
@@ -53,6 +57,8 @@ namespace Assets.InfinitySword.Scripts
         {
             _edge.DORewind();
             _edge.DOScaleY(value, 0.5f).SetEase(Ease.InOutElastic);
+            _articulationBody.mass = MathF.Sqrt(value)/100;
+            _articulationBody.angularDamping = MathF.Sqrt(value) / 100;
         }
     }
 }
